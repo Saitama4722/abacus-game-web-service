@@ -35,6 +35,8 @@ env/
 *.db
 *.sqlite
 *.sqlite3
+db.sqlite3
+db.sqlite3-journal
 
 # IDE and OS
 .idea/
