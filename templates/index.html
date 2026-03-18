@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">Главная</li>
+    </ol>
+</nav>
+
+{% if request.query_params.get('error') == 'forbidden' %}
+<div class="alert alert-warning d-flex align-items-center py-2" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span>Доступ запрещён. Требуются права администратора.</span>
+</div>
+{% endif %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="display-5 mb-3">Добро пожаловать в Абакус</h1>
+        <p class="lead mb-4">
+            Веб-сервис для создания и проведения математических игр. Вы можете просматривать список игр и команд, участвовать в активных играх (решать задания от имени команды), а администраторы — создавать игры, настраивать темы и задания, управлять командами и просматривать результаты.
+        </p>
+        <p class="text-muted small mb-4">
+            Игра «Абакус»: 6 тем × 6 заданий, последовательное решение в рамках каждой темы, фиксированные баллы (10–60) и бонусы за полные строки и столбцы.
+        </p>
+        <hr class="my-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm card-hover-lift">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Игры</h5>
+                        <p class="card-text small">Список игр и участие в них.</p>
+                        <a href="/games/" class="btn btn-primary btn-sm"><i class="bi bi-play-fill me-1"></i>Перейти</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm card-hover-lift">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-people text-primary me-2"></i>Команды</h5>
+                        <p class="card-text small">Управление командами и участие.</p>
+                        <a href="/teams/" class="btn btn-outline-primary btn-sm">Перейти</a>
+                    </div>
+                </div>
+            </div>
+            {% set current_user = user if user is defined else request.state.user %}
+            {% if not current_user %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm card-hover-lift">
+                    <div class="card-body">
+                        <h5 class="card-title">Вход</h5>
+                        <p class="card-text small">Авторизация в системе (админ/модератор).</p>
+                        <a href="/auth/login" class="btn btn-outline-secondary btn-sm">Войти</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if current_user %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm card-hover-lift">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-gear text-primary me-2"></i>Панель администратора</h5>
+                        <p class="card-text small">Управление играми, командами и результатами.</p>
+                        <a href="/admin/" class="btn btn-outline-primary btn-sm">Перейти</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

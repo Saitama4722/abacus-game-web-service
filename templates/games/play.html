@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Играть — {{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item active">Играть</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">{{ game.name }} — игровое поле</h1>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if user.role in ('admin', 'moderator') %}
+        <a href="/games/{{ game.id }}/results" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Итоговая таблица"><i class="bi bi-trophy me-1"></i>Результаты</a>
+        <form method="post" action="/games/{{ game.id }}/finish" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-warning btn-sm">Завершить игру</button>
+        </form>
+        {% endif %}
+        <a href="/games/{{ game.id }}" class="btn btn-outline-secondary btn-sm">К игре</a>
+    </div>
+</div>
+
+{% if user.role in ('admin', 'moderator') and game_teams %}
+<div class="mb-3">
+    <form method="get" action="/games/{{ game.id }}/play" id="teamForm" class="d-flex flex-wrap align-items-center gap-2">
+        <label class="form-label mb-0">Ответ от имени команды:</label>
+        <select id="teamSelect" name="team_id" class="form-select form-select-sm" style="max-width: 280px;">
+            <option value="">— Выберите команду —</option>
+            {% for t in game_teams %}
+            <option value="{{ t.id }}" {{ 'selected' if viewing_team_id == t.id else '' }}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Применить</button>
+    </form>
+    {% if viewing_team_name %}
+    <p class="text-muted small mt-1 mb-0"><strong>Играете за:</strong> {{ viewing_team_name }}</p>
+    {% endif %}
+    <script>
+    (function() {
+        var sel = document.getElementById('teamSelect');
+        var form = document.getElementById('teamForm');
+        if (sel && form) {
+            sel.addEventListener('change', function() {
+                var tid = this.value;
+                var url = '/games/{{ game.id }}/play' + (tid ? '?team_id=' + tid : '');
+                window.location.href = url;
+            });
+        }
+    })();
+    </script>
+</div>
+{% endif %}
+
+<!-- Help section -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header py-2 d-flex align-items-center">
+        <i class="bi bi-info-circle me-2"></i>
+        <span class="fw-bold">Правила и подсказки</span>
+    </div>
+    <div class="card-body small">
+        <ul class="mb-0">
+            <li><strong>Порядок заданий:</strong> в каждой теме задания решаются по порядку (сначала №1, затем №2 и т.д.). Пока не решено предыдущее, следующее недоступно.</li>
+            <li><strong>Цвета ячеек:</strong> зелёный — задание доступно для ответа; серый с галочкой — решено верно; серый с крестиком — ответ дан неверно (одна попытка); серый — заблокировано.</li>
+            <li><strong>Баллы:</strong> за верный ответ команда получает баллы задания (10–60). Дополнительно начисляются бонусы за полную горизонталь (все 6 заданий темы) и за полный вертикальный столбец.</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-9">
+        <!-- Desktop: horizontal scroll table -->
+        <div class="board-table-wrap">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="min-width: 80px;">Тема \ №</th>
+                            {% for k in range(1, 7) %}
+                            <th>Задание {{ k }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in topic_rows %}
+                        <tr>
+                            <td class="text-start fw-bold">Тема {{ row.topic.order_index }}: {{ row.topic.title }}</td>
+                            {% for cell in row.tasks %}
+                            <td class="p-1">
+                                {% if cell.status == 'available' %}
+                                <a href="/games/{{ game.id }}/task/{{ cell.task.id }}{% if viewing_team_id %}?team_id={{ viewing_team_id }}{% endif %}" class="btn btn-success btn-sm w-100 task-cell-available border-0"><i class="bi bi-play-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</a>
+                                {% elif cell.status == 'solved' %}
+                                <span class="btn btn-secondary btn-sm w-100 disabled"><i class="bi bi-check-circle-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</span>
+                                {% elif cell.status == 'attempted' %}
+                                <span class="btn btn-secondary btn-sm w-100 disabled">✗ {{ cell.task.order_index }} ({{ cell.points }})</span>
+                                {% else %}
+                                <span class="btn btn-light btn-sm w-100 disabled text-muted"><i class="bi bi-lock-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile: card-based view -->
+        <div class="board-cards">
+            {% for row in topic_rows %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header fw-bold">Тема {{ row.topic.order_index }}: {{ row.topic.title }}</div>
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        {% for cell in row.tasks %}
+                        <div class="col-6 col-sm-4">
+                            {% if cell.status == 'available' %}
+                            <a href="/games/{{ game.id }}/task/{{ cell.task.id }}{% if viewing_team_id %}?team_id={{ viewing_team_id }}{% endif %}" class="btn btn-success w-100 task-cell-available border-0 py-3"><i class="bi bi-play-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</a>
+                            {% elif cell.status == 'solved' %}
+                            <span class="btn btn-secondary w-100 disabled py-3"><i class="bi bi-check-circle-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</span>
+                            {% elif cell.status == 'attempted' %}
+                            <span class="btn btn-secondary w-100 disabled py-3">✗ {{ cell.task.order_index }} ({{ cell.points }})</span>
+                            {% else %}
+                            <span class="btn btn-light w-100 disabled text-muted py-3"><i class="bi bi-lock-fill me-1"></i>{{ cell.task.order_index }} ({{ cell.points }})</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-lg-3 mt-3 mt-lg-0">
+        <div class="card shadow-sm card-hover-lift">
+            <div class="card-header fw-bold"><i class="bi bi-trophy me-1"></i>Счёт команд</div>
+            <ul class="list-group list-group-flush">
+                {% for s in team_scores %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ s.team_name }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ s.total_score }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if not team_scores %}
+            <div class="card-body text-muted small">В игре пока нет команд или ответов.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Задание {{ task.order_index }} — {{ topic.title }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}/play{% if team_id %}?team_id={{ team_id }}{% endif %}">Игровое поле</a></li>
+        <li class="breadcrumb-item active">Задание {{ task.order_index }}</li>
+    </ol>
+</nav>
+
+<div class="alert alert-warning py-2 small d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-circle me-2"></i>
+    <span>У каждого задания только одна попытка ответа. Отправляйте ответ только когда уверены.</span>
+</div>
+
+<h1 class="mb-2">Задание {{ task.order_index }} ({{ task.points }} баллов)</h1>
+<p class="text-muted">Тема: {{ topic.title }}</p>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h2 class="h6 card-title">Условие</h2>
+        <p class="card-text mb-0">{{ task.text }}</p>
+    </div>
+</div>
+
+{% if user.role in ('admin', 'moderator') %}
+<p class="text-muted small">Ответ от имени команды (ID {{ team_id }}). Выбор команды — на странице игрового поля.</p>
+{% endif %}
+
+<form method="post" action="/games/{{ game.id }}/task/{{ task.id }}/answer" class="mb-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="team_id" value="{{ team_id }}">
+    <div class="mb-3">
+        <label for="submitted_answer" class="form-label">Ваш ответ <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="submitted_answer" name="submitted_answer" required placeholder="Введите ответ" autofocus>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i>Отправить ответ</button>
+    <a href="/games/{{ game.id }}/play{% if team_id %}?team_id={{ team_id }}{% endif %}" class="btn btn-outline-secondary ms-2">Назад к полю</a>
+</form>
+{% endblock %}

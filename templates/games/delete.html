@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Удалить игру {{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item active">Удаление</li>
+    </ol>
+</nav>
+
+<h1 class="mb-4">Удалить игру</h1>
+
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <div>
+        Вы уверены, что хотите удалить игру <strong>{{ game.name }}</strong>? Будут удалены все темы и задания этой игры. Это действие нельзя отменить.
+    </div>
+</div>
+
+<form method="post" action="/games/{{ game.id }}/delete" class="d-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Удалить игру</button>
+</form>
+<a href="/games/{{ game.id }}" class="btn btn-outline-secondary ms-2">Отмена</a>
+{% endblock %}

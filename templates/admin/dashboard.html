@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Панель администратора — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item active">Панель управления</li>
+    </ol>
+</nav>
+
+<h1 class="mb-2">Панель администратора</h1>
+<p class="text-muted mb-2">Здесь вы можете управлять играми (создавать, редактировать, настраивать темы и задания), управлять командами и просматривать результаты завершённых игр.</p>
+<p class="mb-4">Игр: <strong>{{ games_count }}</strong>, команд: <strong>{{ teams_count }}</strong>.</p>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm card-hover-lift h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Управление играми</h5>
+                <p class="card-text small text-muted">Создание и настройка игр, темы и задания (6×6).</p>
+                <a href="/games/" class="btn btn-outline-primary btn-sm">Игры</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm card-hover-lift h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people text-primary me-2"></i>Управление командами</h5>
+                <p class="card-text small text-muted">Команды и участники для участия в играх.</p>
+                <a href="/teams/" class="btn btn-outline-primary btn-sm">Команды</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm card-hover-lift h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-trophy text-primary me-2"></i>Результаты</h5>
+                <p class="card-text small text-muted">Просмотр результатов по завершённым играм.</p>
+                <a href="/games/" class="btn btn-outline-primary btn-sm">Результаты (игры)</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

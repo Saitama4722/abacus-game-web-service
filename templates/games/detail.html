@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item active">{{ game.name }}</li>
+    </ol>
+</nav>
+
+<h1 class="mb-2">{{ game.name }}</h1>
+{% if game.description %}
+<p class="lead text-muted mb-4">{{ game.description }}</p>
+{% endif %}
+
+<h2 class="h5 mt-4 mb-3">Темы и задания</h2>
+{% if topics %}
+<div class="row g-3">
+    {% for topic in topics %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm card-hover-lift">
+            <div class="card-body">
+                <h5 class="card-title">Тема {{ topic.order_index }}: {{ topic.title }}</h5>
+                <p class="card-text small text-muted mb-0">Заданий: {{ topic.tasks|length }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">В этой игре пока нет тем. Добавьте темы и задания через панель администратора.</p>
+{% endif %}
+
+<div class="mt-4 d-flex gap-2 flex-wrap">
+    <a href="/games/" class="btn btn-outline-secondary">К списку игр</a>
+    {% if game.is_active and (game.status | default('in_progress')) != 'finished' %}
+    <a href="/games/{{ game.id }}/play" class="btn btn-success"><i class="bi bi-play-fill me-1"></i>Играть</a>
+    {% endif %}
+    {% if (game.status | default('in_progress')) == 'finished' %}
+    <a href="/games/{{ game.id }}/results" class="btn btn-info"><i class="bi bi-trophy me-1"></i>Результаты</a>
+    {% endif %}
+    {% if can_manage %}
+    <a href="/games/{{ game.id }}/topics" class="btn btn-primary"><i class="bi bi-list-ul me-1"></i>Управление темами и заданиями</a>
+    <a href="/games/{{ game.id }}/edit" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Редактировать игру</a>
+    {% endif %}
+    {% if can_delete %}
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteGameModal"><i class="bi bi-trash me-1"></i>Удалить игру</button>
+    {% endif %}
+</div>
+
+{% if can_delete %}
+<div class="modal fade" id="deleteGameModal" tabindex="-1" aria-labelledby="deleteGameLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGameLabel">Удалить игру</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить игру <strong>{{ game.name }}</strong>? Будут удалены все темы и задания. Это действие нельзя отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="post" action="/games/{{ game.id }}/delete" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

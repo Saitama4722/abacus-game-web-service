@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать тему {{ topic.order_index }} — {{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}/topics">Темы и задания</a></li>
+        <li class="breadcrumb-item active">Тема {{ topic.order_index }}</li>
+    </ol>
+</nav>
+
+<h1 class="mb-2">Редактировать тему {{ topic.order_index }}</h1>
+<p class="text-muted mb-4">Заполните название темы и все 6 заданий (текст, правильный ответ, баллы 10–60).</p>
+
+<form method="post" action="/games/{{ game.id }}/topics/{{ topic.order_index }}/edit" class="needs-validation">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">Название темы</div>
+        <div class="card-body">
+            <div class="mb-0">
+                <label for="topic_title" class="form-label">Тема <span class="text-danger">*</span></label>
+                <input type="text" class="form-control {% if errors.topic_title %}is-invalid{% endif %}" id="topic_title" name="topic_title" value="{{ form_title | default(topic.title, true) }}" required maxlength="256" placeholder="Название темы">
+                {% if errors.topic_title %}
+                <div class="invalid-feedback">{{ errors.topic_title }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h5 mt-4 mb-3">Задания (6 шт., баллы по умолчанию 10–60)</h2>
+    {% for task in tasks %}
+    {% set key_text = 'task_' ~ task.order_index ~ '_text' %}
+    {% set key_answer = 'task_' ~ task.order_index ~ '_correct_answer' %}
+    {% set key_points = 'task_' ~ task.order_index ~ '_points' %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-header">Задание {{ task.order_index }} (порядок не изменяется)</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="task_{{ task.order_index }}_text" class="form-label">Текст задания <span class="text-danger">*</span></label>
+                <textarea class="form-control {% if key_text in errors %}is-invalid{% endif %}" id="task_{{ task.order_index }}_text" name="task_{{ task.order_index }}_text" rows="2" required placeholder="Условие задания">{{ task.text }}</textarea>
+                {% if key_text in errors %}
+                <div class="invalid-feedback">{{ errors[key_text] }}</div>
+                {% endif %}
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6 mb-3">
+                    <label for="task_{{ task.order_index }}_correct_answer" class="form-label">Правильный ответ <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control {% if key_answer in errors %}is-invalid{% endif %}" id="task_{{ task.order_index }}_correct_answer" name="task_{{ task.order_index }}_correct_answer" value="{{ task.correct_answer }}" maxlength="256" placeholder="Ответ">
+                    {% if key_answer in errors %}
+                    <div class="invalid-feedback">{{ errors[key_answer] }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="task_{{ task.order_index }}_points" class="form-label">Баллы (10–60)</label>
+                    <input type="number" class="form-control {% if key_points in errors %}is-invalid{% endif %}" id="task_{{ task.order_index }}_points" name="task_{{ task.order_index }}_points" value="{{ task.points }}" min="10" max="60" step="10">
+                    {% if key_points in errors %}
+                    <div class="invalid-feedback">{{ errors[key_points] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="d-flex gap-2 mb-4">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-pencil me-1"></i>Сохранить тему и задания</button>
+        <a href="/games/{{ game.id }}/topics" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}

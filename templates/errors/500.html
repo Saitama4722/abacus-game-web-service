@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка сервера — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item active">Ошибка</li>
+    </ol>
+</nav>
+<div class="row justify-content-center text-center py-5">
+    <div class="col-lg-6">
+        <h1 class="display-1 text-muted">500</h1>
+        <h2 class="mb-3">Внутренняя ошибка сервера</h2>
+        <p class="lead text-muted">Произошла непредвиденная ошибка. Попробуйте позже или вернитесь на главную.</p>
+        <a href="/" class="btn btn-primary">На главную</a>
+    </div>
+</div>
+{% endblock %}

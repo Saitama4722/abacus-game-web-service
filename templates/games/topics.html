@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Темы и задания — {{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item active">Темы и задания</li>
+    </ol>
+</nav>
+
+<h1 class="mb-2">Темы и задания</h1>
+<p class="text-muted mb-4">Игра «{{ game.name }}»: 6 тем × 6 заданий. Отредактируйте тему, чтобы заполнить условия и правильные ответы.</p>
+
+{% if topics %}
+<div class="list-group">
+    {% for topic in topics %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            <strong>Тема {{ topic.order_index }}:</strong> {{ topic.title }}
+            <span class="text-muted ms-2 small">Заданий: {{ topic.tasks | length }}</span>
+        </div>
+        <a href="/games/{{ game.id }}/topics/{{ topic.order_index }}/edit" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Редактировать тему и задания"><i class="bi bi-pencil me-1"></i>Редактировать</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p class="text-muted mb-0">В этой игре пока нет тем. Они создаются автоматически при первом входе в раздел.</p>
+</div>
+{% endif %}
+
+<div class="mt-4 d-flex gap-2 flex-wrap">
+    <a href="/games/{{ game.id }}" class="btn btn-outline-primary">К игре</a>
+    <a href="/games/" class="btn btn-outline-secondary">К списку игр</a>
+</div>
+{% endblock %}

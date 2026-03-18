@@ -1,0 +1,135 @@
+/* ===== Stage 9: Custom styles for Abacus Game ===== */
+
+:root {
+  --abacus-primary: #0d6efd;
+  --abacus-success: #198754;
+  --abacus-danger: #dc3545;
+  --abacus-warning: #ffc107;
+  --abacus-info: #0dcaf0;
+  --task-available: #198754;
+  --task-solved: #6c757d;
+  --task-attempted: #6c757d;
+  --task-locked: #e9ecef;
+  --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --card-shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Typography and spacing */
+body {
+  font-size: 1rem;
+}
+
+/* Touch targets and mobile: min 44px, input font 16px to prevent iOS zoom */
+@media (max-width: 768px) {
+  .btn,
+  .form-control,
+  .form-select,
+  .nav-link {
+    min-height: 44px;
+  }
+  .form-control,
+  .form-select,
+  input[type="text"],
+  input[type="password"],
+  input[type="number"] {
+    font-size: 16px !important;
+  }
+  .btn-sm {
+    min-height: 38px;
+    padding: 0.35rem 0.65rem;
+  }
+}
+
+/* Task status classes (game board) */
+.task-cell-available {
+  background-color: var(--task-available);
+  color: #fff;
+}
+.task-cell-available:hover {
+  background-color: #157347;
+  color: #fff;
+}
+.task-cell-solved {
+  background-color: var(--task-solved);
+  color: #fff;
+}
+.task-cell-attempted {
+  background-color: var(--task-attempted);
+  color: #fff;
+}
+.task-cell-locked {
+  background-color: var(--task-locked);
+  color: #6c757d;
+}
+
+/* Cards: subtle shadow and hover */
+.card {
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Buttons hover */
+.btn {
+  transition: opacity 0.15s ease;
+}
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Table responsive wrapper (used in templates) */
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Game board: card view on small screens */
+.board-cards {
+  display: none;
+}
+.board-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 767px) {
+  .board-table-wrap {
+    display: none;
+  }
+  .board-cards {
+    display: block;
+  }
+}
+
+/* Empty state block */
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  background: var(--task-locked);
+  border-radius: 0.375rem;
+}
+
+/* Flash messages: optional auto-dismiss (handled in JS) */
+.flash-messages .alert {
+  margin-bottom: 0.5rem;
+}
+
+/* Navbar: ensure toggler is touch-friendly */
+.navbar-toggler {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Form spacing */
+.form-label.required::after {
+  content: " *";
+  color: var(--abacus-danger);
+}
+
+/* Breadcrumb spacing */
+.breadcrumb {
+  margin-bottom: 1rem;
+}

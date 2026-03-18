@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/teams/">Команды</a></li>
+        <li class="breadcrumb-item active">{{ team.name }}</li>
+    </ol>
+</nav>
+
+<h1 class="mb-2">{{ team.name }}</h1>
+<p class="text-muted mb-2">Команда создана: {{ team.created_at.strftime('%d.%m.%Y') if team.created_at else '—' }}</p>
+<p class="text-muted mb-4">Участников в команде: {{ team.members | length }}</p>
+
+<div class="mt-4 d-flex gap-2 flex-wrap">
+    <a href="/teams/" class="btn btn-outline-secondary">К списку команд</a>
+    {% if can_manage %}
+    <a href="/teams/{{ team.id }}/edit" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Редактировать</a>
+    {% endif %}
+    {% if can_delete %}
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTeamModal"><i class="bi bi-trash me-1"></i>Удалить команду</button>
+    {% endif %}
+</div>
+
+{% if can_delete %}
+<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTeamLabel">Удалить команду</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить команду <strong>{{ team.name }}</strong>? Это действие нельзя отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="post" action="/teams/{{ team.id }}/delete" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
