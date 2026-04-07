@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item active">Регистрация</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h5 class="mb-0">Регистрация нового пользователя</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Зарегистрируйтесь, чтобы получить возможность присоединяться к командам и участвовать в играх.</p>
+                
+                {% if request.query_params.get('error') == 'password_mismatch' %}
+                <div class="alert alert-danger py-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <span>Пароли не совпадают. Пожалуйста, попробуйте еще раз.</span>
+                </div>
+                {% elif request.query_params.get('error') == 'username_taken' %}
+                <div class="alert alert-danger py-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <span>Пользователь с таким именем уже существует. Выберите другое имя.</span>
+                </div>
+                {% elif request.query_params.get('error') == 'email_taken' %}
+                <div class="alert alert-danger py-2 d-flex align-items-center" role="alert">
+                    <i class="bi bi-x-circle me-2"></i>
+                    <span>Данная электронная почта уже используется.</span>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="/auth/register">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя (Логин) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" required autocomplete="username" placeholder="Введите уникальное имя">
+                    </div>
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Ваше полное имя</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" autocomplete="name" placeholder="Например, Иван Иванов">
+                        <div class="form-text">Необязательно, но поможет организаторам узнать вас.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Электронная почта</label>
+                        <input type="email" class="form-control" id="email" name="email" autocomplete="email" placeholder="student@example.com">
+                        <div class="form-text">Необязательно.</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">Пароль <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password" placeholder="Пароль">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="password_confirm" class="form-label">Повторите пароль <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required autocomplete="new-password" placeholder="Еще раз пароль">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Зарегистрироваться</button>
+                    
+                    <div class="text-center">
+                        <span class="text-muted small">Уже есть аккаунт?</span>
+                        <a href="/auth/login" class="text-decoration-none small">Войти</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

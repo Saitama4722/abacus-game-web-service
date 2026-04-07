@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Играть — {{ game.name }} — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item"><a href="/games/">Игры</a></li>
+        <li class="breadcrumb-item"><a href="/games/{{ game.id }}">{{ game.name }}</a></li>
+        <li class="breadcrumb-item active">Играть</li>
+    </ol>
+</nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h4 mb-0">{{ game.name }} — игровое поле</h1>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if user.role in ('administrator', 'moderator') %}
+        <a href="/games/{{ game.id }}/results" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Итоговая таблица"><i class="bi bi-trophy me-1"></i>Результаты</a>
+        <a href="/games/{{ game.id }}/answers" class="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="Проверка ответов"><i class="bi bi-pencil-square me-1"></i>Ответы</a>
+        {% if game.status == 'in_progress' %}
+        <form method="post" action="/games/{{ game.id }}/pause" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-secondary btn-sm"><i class="bi bi-pause-fill me-1"></i>Пауза</button>
+        </form>
+        {% elif game.status == 'paused' %}
+        <form method="post" action="/games/{{ game.id }}/resume" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-play-fill me-1"></i>Возобновить</button>
+        </form>
+        {% endif %}
+        {% if game.status != 'finished' %}
+        <form method="post" action="/games/{{ game.id }}/finish" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-warning btn-sm">Завершить игру</button>
+        </form>
+        {% endif %}
+        {% endif %}
+        <a href="/games/{{ game.id }}" class="btn btn-outline-secondary btn-sm">К игре</a>
+    </div>
+</div>
+
+{% if user.role in ('administrator', 'moderator') and game_teams %}
+<div class="mb-3">
+    <form method="get" action="/games/{{ game.id }}/play" id="teamForm" class="d-flex flex-wrap align-items-center gap-2">
+        <label class="form-label mb-0">Ответ от имени команды:</label>
+        <select id="teamSelect" name="team_id" class="form-select form-select-sm" style="max-width: 280px;">
+            <option value="">— Выберите команду —</option>
+            {% for t in game_teams %}
+            <option value="{{ t.id }}" {{ 'selected' if viewing_team_id == t.id else '' }}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Применить</button>
+    </form>
+    {% if viewing_team_name %}
+    <p class="text-muted small mt-1 mb-0"><strong>Играете за:</strong> {{ viewing_team_name }}</p>
+    {% endif %}
+    <script>
+    (function() {
+        var sel = document.getElementById('teamSelect');
+        var form = document.getElementById('teamForm');
+        if (sel && form) {
+            sel.addEventListener('change', function() {
+                var tid = this.value;
+                var url = '/games/{{ game.id }}/play' + (tid ? '?team_id=' + tid : '');
+                window.location.href = url;
+            });
+        }
+    })();
+    </script>
+</div>
+{% endif %}
+
+<!-- Five-by-Five Game Rules -->
+<div class="card mb-4 shadow-sm border-primary">
+    <div class="card-header bg-primary text-white py-2 d-flex align-items-center">
+        <i class="bi bi-grid-3x3 me-2"></i>
+        <span class="fw-bold">Игра «Пять-на-пять» — Правила</span>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info mb-3">
+            <strong><i class="bi bi-trophy me-1"></i>Цель игры:</strong> Собрать как можно больше <strong>линий</strong> на игровом поле 5×5, решая математические задания.
+        </div>
+        
+        <h6 class="fw-bold mb-2"><i class="bi bi-star-fill text-warning me-1"></i>Что такое линия?</h6>
+        <p class="small mb-3">Линия — это 5 правильно решённых заданий, расположенных подряд:</p>
+        <ul class="small mb-3">
+            <li><strong>Горизонталь:</strong> все 5 заданий в одной строке (например, строка 1: задания 1-5)</li>
+            <li><strong>Вертикаль:</strong> все 5 заданий в одном столбце (например, столбец 3: задания из каждой строки)</li>
+            <li><strong>Диагональ:</strong> главная диагональ (1-1, 2-2, 3-3, 4-4, 5-5) или побочная диагональ (1-5, 2-4, 3-3, 4-2, 5-1)</li>
+        </ul>
+        
+        <h6 class="fw-bold mb-2"><i class="bi bi-calculator me-1"></i>Система начисления баллов:</h6>
+        <ul class="small mb-3">
+            <li><strong>Базовые баллы:</strong> за каждое правильно решённое задание начисляются баллы задания</li>
+            <li><strong>Бонус за линию:</strong> <span class="badge bg-success">+50 баллов</span> за каждую полностью собранную линию</li>
+            <li><strong>Максимум линий:</strong> можно собрать до 12 линий (5 горизонталей + 5 вертикалей + 2 диагонали)</li>
+        </ul>
+        
+        <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb me-1"></i>Стратегия:</h6>
+        <p class="small mb-2">В отличие от игры «Абакус», здесь важно не только решать задания, но и <strong>планировать</strong>, какие линии собирать первыми. Выбирайте задания так, чтобы максимизировать количество линий!</p>
+        
+        <div class="border-top pt-2 mt-2">
+            <p class="small text-muted mb-1"><strong>Порядок заданий:</strong> все задания доступны сразу, можно выбрать любое</p>
+            <p class="small text-muted mb-0"><strong>Цвета ячеек:</strong> <span class="badge bg-success">зелёный</span> — доступно; <span class="badge bg-secondary">✓</span> — верно; <span class="badge bg-secondary">✗</span> — неверно</p>
+        </div>
+    </div>
+</div>
+
+{% if is_finished %}
+<div class="card mb-4 shadow-sm border-warning">
+    <div class="card-body py-2 text-warning fw-bold">
+        <i class="bi bi-info-circle me-1"></i>Игра завершена организатором.
+    </div>
+</div>
+{% elif is_paused %}
+<div class="card mb-4 shadow-sm border-secondary">
+    <div class="card-body py-2 text-secondary fw-bold">
+        <i class="bi bi-pause-circle me-1"></i>Игра приостановлена. Ответы временно не принимаются.
+    </div>
+</div>
+{% elif game_has_not_started %}
+<div class="card mb-4 shadow-sm border-secondary">
+    <div class="card-body py-2 text-secondary fw-bold">
+        <i class="bi bi-clock me-1"></i>Игра ещё не началась (начало в {{ game.start_time.strftime('%d.%m.%Y %H:%M') }}).
+    </div>
+</div>
+{% elif time_expired %}
+<div class="card mb-4 shadow-sm border-danger">
+    <div class="card-body py-2 text-danger fw-bold">
+        <i class="bi bi-clock-fill me-1"></i>Время игры истекло. Ответы больше не принимаются.
+    </div>
+</div>
+{% elif end_time %}
+<div id="activeGameStatus" class="card mb-4 shadow-sm border-info">
+    <div class="card-body py-2 text-info d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span class="fw-bold"><i class="bi bi-play-circle-fill me-1"></i>Игра активна</span>
+        <span id="countdownTimer" class="fw-bold fs-5">
+            <i class="bi bi-clock me-1"></i><span id="timeRemainingText">Загрузка...</span>
+        </span>
+    </div>
+</div>
+<script>
+(function() {
+    var endTs = {{ end_time_ts }};
+    var serverNowTs = {{ server_now_ts }};
+    var clientLoadTs = Math.floor(Date.now() / 1000);
+    var timerEl = document.getElementById('timeRemainingText');
+    var statusCard = document.getElementById('activeGameStatus');
+    var countdownTimer = document.getElementById('countdownTimer');
+    
+    function updateTimer() {
+        var currentClientTs = Math.floor(Date.now() / 1000);
+        var elapsedSinceLoad = currentClientTs - clientLoadTs;
+        var currentServerTs = serverNowTs + elapsedSinceLoad;
+        var diff = endTs - currentServerTs;
+        
+        if (diff <= 0) {
+            timerEl.textContent = "Время истекло!";
+            statusCard.className = "card mb-4 shadow-sm border-danger";
+            statusCard.querySelector('.card-body').className = "card-body py-2 text-danger d-flex align-items-center justify-content-between flex-wrap gap-2";
+            statusCard.querySelector('.bi-play-circle-fill').className = "bi bi-clock-fill me-1";
+            statusCard.querySelector('span.fw-bold').textContent = "Время истекло. Блокировка...";
+            setTimeout(function() { window.location.reload(); }, 2000);
+            return true; // Stop interval
+        }
+        
+        var mins = Math.floor(diff / 60);
+        var secs = diff % 60;
+        var timeStr = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+        
+        if (diff <= 600) { // 10 minutes warning
+            timerEl.textContent = timeStr + " — Меньше 10 минут!";
+            statusCard.className = "card mb-4 shadow-sm border-danger";
+            var textInfo = statusCard.querySelector('.text-info');
+            if (textInfo) textInfo.className = textInfo.className.replace('text-info', 'text-danger');
+            countdownTimer.className = "fw-bold fs-5 text-danger animated-pulse";
+        } else {
+            timerEl.textContent = "Осталось: " + timeStr;
+        }
+        return false;
+    }
+    
+    if (!updateTimer()) {
+        var ival = setInterval(function() {
+            if (updateTimer()) clearInterval(ival);
+        }, 1000);
+    }
+})();
+</script>
+<style>
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.animated-pulse { animation: pulse 2s infinite; }
+</style>
+{% endif %}
+
+<!-- Line Progress Indicator -->
+{% if viewing_team_id and current_result %}
+<div class="card mb-3 border-success">
+    <div class="card-body py-2">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong><i class="bi bi-trophy-fill text-warning me-1"></i>Собрано линий:</strong>
+                <span class="badge bg-success fs-6 ms-2">{{ (current_result.score_horizontal_bonus // 50) if current_result.score_horizontal_bonus else 0 }} из 12</span>
+            </div>
+            <div class="small text-muted">
+                Бонус: <strong>+{{ current_result.score_horizontal_bonus or 0 }}</strong> баллов
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-9">
+        <!-- Desktop: horizontal scroll table -->
+        <div class="board-table-wrap">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="min-width: 80px;">Тема \ №</th>
+                            {% for k in range(1, 6) %}
+                            <th>Задание {{ k }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in topic_rows %}
+                        <tr>
+                            {% if row.topic %}
+                            <td class="text-start fw-bold">Тема {{ row.order_index }}: {{ row.topic.title }}</td>
+                            {% else %}
+                            <td class="text-start fw-bold text-muted">Тема {{ row.order_index }}: Не назначена</td>
+                            {% endif %}
+                            
+                            {% for cell in row.tasks %}
+                            <td class="p-1">
+                                {% if cell.status == 'empty' %}
+                                <span class="btn btn-light btn-sm w-100 disabled border border-light text-muted">—</span>
+                                {% elif cell.status == 'available' and not board_locked %}
+                                <a href="/games/{{ game.id }}/task/{{ cell.task.id }}{% if viewing_team_id %}?team_id={{ viewing_team_id }}{% endif %}" class="btn btn-primary fw-bold btn-sm w-100 shadow-sm border-0"><i class="bi bi-play-circle-fill me-1"></i>{{ cell.order_index }} ({{ cell.points }})</a>
+                                {% elif cell.status == 'available' and board_locked %}
+                                <span class="btn btn-secondary fw-bold btn-sm w-100 disabled border-0 text-white"><i class="bi bi-lock-fill me-1"></i>{{ cell.order_index }} ({{ cell.points }})</span>
+                                {% elif cell.status == 'solved' %}
+                                <span class="btn btn-success fw-bold btn-sm w-100 disabled border-0 text-white"><i class="bi bi-check-circle-fill me-1"></i>{{ cell.points }}</span>
+                                {% elif cell.status == 'attempted' %}
+                                <span class="btn btn-danger fw-bold btn-sm w-100 disabled border-0 text-white"><i class="bi bi-x-circle-fill me-1"></i>0</span>
+                                {% else %}
+                                <span class="btn btn-secondary btn-sm w-100 disabled text-white"><i class="bi bi-lock-fill me-1"></i>{{ cell.points }}</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile: card-based view -->
+        <div class="board-cards">
+            {% for row in topic_rows %}
+            <div class="card mb-3 shadow-sm">
+                {% if row.topic %}
+                <div class="card-header fw-bold">Тема {{ row.order_index }}: {{ row.topic.title }}</div>
+                {% else %}
+                <div class="card-header fw-bold text-muted">Тема {{ row.order_index }}: Не назначена</div>
+                {% endif %}
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        {% for cell in row.tasks %}
+                        <div class="col-6 col-sm-4">
+                            {% if cell.status == 'empty' %}
+                            <span class="btn btn-light w-100 disabled py-3 border text-muted">—</span>
+                            {% elif cell.status == 'available' and not board_locked %}
+                            <a href="/games/{{ game.id }}/task/{{ cell.task.id }}{% if viewing_team_id %}?team_id={{ viewing_team_id }}{% endif %}" class="btn btn-primary fw-bold w-100 shadow-sm border-0 py-3"><i class="bi bi-play-circle-fill d-block fs-3 mb-1"></i>{{ cell.order_index }} ({{ cell.points }})</a>
+                            {% elif cell.status == 'available' and board_locked %}
+                            <span class="btn btn-secondary fw-bold w-100 disabled py-3 text-white"><i class="bi bi-lock-fill d-block fs-3 mb-1"></i>{{ cell.order_index }} ({{ cell.points }})</span>
+                            {% elif cell.status == 'solved' %}
+                            <span class="btn btn-success fw-bold w-100 disabled py-3 text-white"><i class="bi bi-check-circle-fill d-block fs-3 mb-1"></i>{{ cell.points }}</span>
+                            {% elif cell.status == 'attempted' %}
+                            <span class="btn btn-danger fw-bold w-100 disabled py-3 text-white"><i class="bi bi-x-circle-fill d-block fs-3 mb-1"></i>0</span>
+                            {% else %}
+                            <span class="btn btn-secondary fw-bold w-100 disabled text-white py-3"><i class="bi bi-lock-fill d-block fs-3 mb-1"></i>{{ cell.points }}</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-lg-3 mt-3 mt-lg-0">
+        <div class="card shadow-sm card-hover-lift">
+            <div class="card-header fw-bold"><i class="bi bi-trophy me-1"></i>Счёт команд</div>
+            <ul class="list-group list-group-flush">
+                {% for s in team_scores %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ s.team_name }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ s.total_score }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if not team_scores %}
+            <div class="card-body text-muted small">В игре пока нет команд или ответов.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

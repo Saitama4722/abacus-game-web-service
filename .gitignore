@@ -60,3 +60,20 @@ htmlcov/
 
 # Project-specific
 abacus_game.db
+abacus_game_verify_startup.db
+
+# Temporary documentation files
+*_FIX.md
+*_FIXES.md
+*_SUMMARY.md
+*_COMPLETE.md
+*_REPORT.md
+FIXES_*.md
+TEST_*.md
+PLAYWRIGHT_*.md
+
+# Playwright E2E Tests
+node_modules/
+test-results/
+playwright-report/
+playwright/.cache/

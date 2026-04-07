@@ -13,21 +13,35 @@
 
 ## 📋 Описание
 
-Веб-сервис для **создания и проведения математических игр** — курсовая работа. Реализована игра **«Абака»** (Математический квадрат): создание игр, управление командами, проведение турниров с прозрачной системой подсчёта очков.
+Веб-сервис для **создания и проведения математических игр** — учебный проект на Python и FastAPI. Реализованы две игры с различной механикой:
 
-Кратко об игре: поле 6×6 (6 тем × 6 заданий), задания в каждой теме решаются **строго по порядку**, начисляются фиксированные баллы (10, 20, 30, 40, 50, 60) и бонусы за полные строки и столбцы (горизонталь +50, вертикаль — стоимость задания, супербонус — удвоение для первой команды).
+- **«Абакус» (6×6)** — классическая игра с последовательным решением заданий и бонусами за строки/столбцы
+- **«Пять-на-пять» (5×5)** — стратегическая игра с фокусом на сборе линий (горизонтали, вертикали, диагонали)
+
+Полный цикл: создание игр, управление командами, проведение турниров, автоматический подсчёт очков, система ролей, адаптивный интерфейс на русском языке.
 
 ---
 
 ## ✨ Возможности
 
-- **CRUD игр и команд** — полное создание, редактирование и удаление игр и команд
-- **Редактор поля 6×6** — настройка тем и заданий для каждой игры
-- **Строгие правила** — порядок решения заданий в теме, проверка ответов
-- **Система очков** — баллы 10, 20, 30, 40, 50, 60; бонусы за строку (+50), столбец (стоимость задания), супербонус (удвоение для первой команды)
-- **Роли** — администратор, модератор, команда (team)
-- **Адаптивный интерфейс** — Bootstrap 5, интерфейс на русском языке
-- **Демо при первом запуске** — автоматическое создание демо-игры и учётной записи admin/admin
+### Игровая механика
+- **Две игры с разной стратегией:**
+  - **Абакус (6×6)** — последовательное решение заданий, бонусы за строки/столбцы
+  - **Пять-на-пять (5×5)** — свободный выбор заданий, бонусы за линии (+50 за каждую)
+- **Система очков** — базовые баллы за задания, бонусы за достижения, автоматический подсчёт
+- **Строгая валидация** — проверка ответов, контроль доступности заданий
+
+### Управление
+- **CRUD игр и команд** — создание, редактирование, удаление
+- **Редактор игрового поля** — настройка тем и заданий для каждой игры
+- **Система ролей** — администратор, модератор, команда
+- **Управление турниром** — пауза, возобновление, завершение игры
+
+### Технические возможности
+- **Адаптивный интерфейс** — Bootstrap 5, полностью на русском языке
+- **Автоматическая демонстрация** — при первом запуске создаются демо-игры и учётная запись admin/admin
+- **Автоматический выбор порта** — если порт 8000 занят, используется следующий доступный
+- **Тестирование** — pytest для unit-тестов, Playwright для E2E browser-тестов
 
 ---
 
@@ -99,22 +113,44 @@ python run.py
 
 ---
 
-## 🎮 Как играть
+## 🎮 Реализованные игры
 
-Пошаговая инструкция для первого запуска (администратор/игрок):
+### Абакус (6×6)
+**Классическая игра с последовательным решением**
 
-1. Запустите сервер: `python run.py` и откройте в браузере адрес из консоли (например `http://127.0.0.1:8000`).
-2. Войдите: нажмите **«Вход»**, введите логин **`admin`** и пароль **`admin`**.
-3. Перейдите в **«Игры»** и выберите **«Демо-игра Абакус»**.
-4. Нажмите **«Играть»**.
-5. Выберите команду (например **«Команда Альфа»** или **«Команда Бета»**).
-6. На игровом поле 6×6 ориентируйтесь по цветам ячеек:
-   - 🟢 **Зелёная** — задание доступно для решения (следующее по порядку в теме).
-   - ✅ **Решённое** — задание уже засчитано.
-   - ❌ **Неверный ответ** — можно пробовать снова (если предусмотрено правилами).
-   - 🔒 **Заблокированная** — задание пока недоступно (нужно решить предыдущее в теме).
-7. **Порядок:** в каждой теме задания решаются строго по порядку: сначала 1-е, затем 2-е, …, затем 6-е.
-8. **Бонусы:** после решения всех 6 заданий в теме — бонус +50 за полную строку; за полный столбец — бонус равен стоимости задания; супербонус — первой команде удвоенные бонусы.
+- **Поле:** 6 тем × 6 заданий
+- **Правила:** задания в каждой теме решаются строго по порядку (1→2→3→4→5→6)
+- **Баллы:** фиксированные (10, 20, 30, 40, 50, 60)
+- **Бонусы:**
+  - Горизонталь (полная тема): +50 баллов
+  - Вертикаль (одинаковый номер задания во всех темах): +стоимость задания
+  - Супербонус: первая команда получает удвоенные бонусы
+- **Стратегия:** важен порядок решения и скорость
+
+### Пять-на-пять (5×5)
+**Стратегическая игра со сбором линий**
+
+- **Поле:** 5 тем × 5 заданий
+- **Правила:** все задания доступны сразу, можно выбирать любое
+- **Баллы:** за каждое правильное задание
+- **Бонусы:** +50 баллов за каждую собранную линию:
+  - 5 горизонталей (полные строки)
+  - 5 вертикалей (полные столбцы)
+  - 2 диагонали (главная и побочная)
+- **Максимум:** до 12 линий = до +600 бонусных баллов
+- **Стратегия:** планирование, какие линии собирать первыми
+
+### Как начать играть
+
+1. Запустите `python run.py` и откройте адрес из консоли
+2. Войдите: **admin** / **admin**
+3. Перейдите в **«Игры»** → выберите демо-игру
+4. Нажмите **«Играть»** → выберите команду
+5. Решайте задания, следя за цветами ячеек:
+   - 🟢 **Зелёная** — доступно
+   - ✅ **Галочка** — решено верно
+   - ❌ **Крестик** — решено неверно
+   - 🔒 **Замок** — заблокировано (только для Абакуса)
 
 ---
 
@@ -155,13 +191,41 @@ abacus-game-web-service/
 
 ---
 
-## 🧪 Запуск тестов
+## 🧪 Тестирование
+
+### Unit-тесты (pytest)
 
 ```bash
 pytest tests/ -v
 ```
 
-Запускает все тесты в каталоге `tests/` с подробным выводом.
+Запускает unit-тесты: авторизация, CRUD-операции, игровая логика, система подсчёта очков.
+
+### E2E browser-тесты (Playwright)
+
+**Установка (один раз):**
+```bash
+npm install
+npx playwright install
+```
+
+**Запуск тестов:**
+```bash
+npm test
+```
+
+Автоматические браузерные тесты проверяют:
+- Доступность страниц
+- Аутентификацию пользователей
+- Создание игр (admin flow)
+- Открытие и решение заданий
+- Корректность рендеринга шаблонов
+
+**Дополнительные команды:**
+```bash
+npm run test:headed    # С видимым браузером
+npm run test:ui        # Интерактивный UI-режим
+```
 
 ---
 
@@ -171,9 +235,11 @@ pytest tests/ -v
 
 ---
 
-## 👨‍💻 Автор
+## � Контакты
 
 - **GitHub:** [Saitama4722](https://github.com/Saitama4722)
+- **Telegram:** [@VadikQA](https://t.me/VadikQA)
+- **Репозиторий:** [github.com/Saitama4722/abacus-game-web-service](https://github.com/Saitama4722/abacus-game-web-service)
 
 ---
 
@@ -191,19 +257,35 @@ pytest tests/ -v
 
 ## 📋 Description
 
-**Web service for creating and conducting mathematical games** — coursework project. Implements the **«Abaca»** game (Mathematical Square): 6 topics × 6 tasks, tasks must be solved in order within each topic. Points: 10, 20, 30, 40, 50, 60. Bonuses: horizontal (full topic, +50), vertical (same task number in all topics, task value), superbonus (first team(s) get double points). Tech stack: Python, FastAPI, SQLite, SQLAlchemy (ORM), Jinja2, Bootstrap 5, Uvicorn. Features: full CRUD for games/teams, 6×6 board editor, strict gameplay rules, scoring system, admin/moderator/team roles, responsive UI in Russian, automatic demo game and admin account on first start.
+**Web service for creating and conducting mathematical games** — educational Python project built with FastAPI. Two games with different mechanics:
+
+- **«Abacus» (6×6)** — classic game with sequential task solving and row/column bonuses
+- **«Five-by-Five» (5×5)** — strategic game focused on collecting lines (horizontal, vertical, diagonal)
+
+Complete cycle: game creation, team management, tournament hosting, automatic scoring, role system, responsive Russian interface.
 
 ---
 
 ## ✨ Features
 
-- **Full CRUD** for games and teams
-- **6×6 board editor** — configure topics and tasks per game
-- **Strict rules** — tasks in order per topic, answer validation
-- **Scoring** — 10, 20, 30, 40, 50, 60; row bonus +50, column bonus (task value), superbonus (double for first team)
-- **Roles** — Admin, Moderator, Team
-- **Responsive UI** in Russian (Bootstrap 5)
-- **Auto demo** on first launch — default credentials **admin** / **admin**, demo game created automatically
+### Game Mechanics
+- **Two games with different strategies:**
+  - **Abacus (6×6)** — sequential task solving, row/column bonuses
+  - **Five-by-Five (5×5)** — free task selection, line bonuses (+50 each)
+- **Scoring system** — base points for tasks, achievement bonuses, automatic calculation
+- **Strict validation** — answer checking, task availability control
+
+### Management
+- **Full CRUD** for games and teams — create, edit, delete
+- **Game board editor** — configure topics and tasks per game
+- **Role system** — administrator, moderator, team
+- **Tournament control** — pause, resume, finish game
+
+### Technical Features
+- **Responsive UI** — Bootstrap 5, fully in Russian
+- **Auto demo** — demo games and admin/admin account created on first launch
+- **Auto port selection** — uses next available port if 8000 is busy
+- **Testing** — pytest for unit tests, Playwright for E2E browser tests
 
 ---
 
@@ -275,22 +357,44 @@ Log in from the home page → «Вход» (Login) → enter `admin` / `admin`. 
 
 ---
 
-## 🎮 How to Play
+## 🎮 Implemented Games
 
-Step-by-step guide for a first-time user/admin:
+### Abacus (6×6)
+**Classic game with sequential solving**
 
-1. Run `python run.py` and open the URL from the console (e.g. `http://127.0.0.1:8000`).
-2. Log in: click **«Вход»**, enter **`admin`** / **`admin`**.
-3. Go to **«Игры»** (Games) and select **«Демо-игра Абакус»**.
-4. Click **«Играть»** (Play).
-5. Choose a team (e.g. **«Команда Альфа»** or **«Команда Бета»**).
-6. On the 6×6 board, use the color legend:
-   - 🟢 **Green** — task available (next in order in the topic).
-   - ✅ **Solved** — task already counted.
-   - ❌ **Wrong** — incorrect answer (retry if allowed).
-   - 🔒 **Locked** — task not yet available (solve the previous one in the topic first).
-7. **Order:** within each topic, solve tasks **in order** (1st, then 2nd, …, then 6th).
-8. **Bonuses:** after solving all 6 tasks in a topic — +50 row bonus; full column — bonus equals task value; superbonus — first team gets double.
+- **Board:** 6 topics × 6 tasks
+- **Rules:** tasks in each topic must be solved in order (1→2→3→4→5→6)
+- **Points:** fixed (10, 20, 30, 40, 50, 60)
+- **Bonuses:**
+  - Horizontal (full topic): +50 points
+  - Vertical (same task number in all topics): +task value
+  - Superbonus: first team gets double bonuses
+- **Strategy:** order and speed matter
+
+### Five-by-Five (5×5)
+**Strategic game with line collection**
+
+- **Board:** 5 topics × 5 tasks
+- **Rules:** all tasks available immediately, choose any
+- **Points:** for each correct task
+- **Bonuses:** +50 points per collected line:
+  - 5 horizontals (full rows)
+  - 5 verticals (full columns)
+  - 2 diagonals (main and anti-diagonal)
+- **Maximum:** up to 12 lines = up to +600 bonus points
+- **Strategy:** planning which lines to collect first
+
+### How to Start Playing
+
+1. Run `python run.py` and open the URL from console
+2. Log in: **admin** / **admin**
+3. Go to **«Игры»** (Games) → select demo game
+4. Click **«Играть»** (Play) → choose team
+5. Solve tasks, following cell colors:
+   - 🟢 **Green** — available
+   - ✅ **Checkmark** — solved correctly
+   - ❌ **Cross** — solved incorrectly
+   - 🔒 **Lock** — locked (Abacus only)
 
 ---
 
@@ -322,13 +426,41 @@ abacus-game-web-service/
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Testing
+
+### Unit Tests (pytest)
 
 ```bash
 pytest tests/ -v
 ```
 
-Runs all tests in the `tests/` directory with verbose output.
+Runs unit tests: authentication, CRUD operations, game logic, scoring system.
+
+### E2E Browser Tests (Playwright)
+
+**Installation (once):**
+```bash
+npm install
+npx playwright install
+```
+
+**Run tests:**
+```bash
+npm test
+```
+
+Automated browser tests verify:
+- Page accessibility
+- User authentication
+- Game creation (admin flow)
+- Task opening and solving
+- Template rendering correctness
+
+**Additional commands:**
+```bash
+npm run test:headed    # With visible browser
+npm run test:ui        # Interactive UI mode
+```
 
 ---
 
@@ -338,6 +470,8 @@ Educational project for coursework. No formal license. Use for educational purpo
 
 ---
 
-## 👨‍💻 Author
+## � Contact
 
 - **GitHub:** [Saitama4722](https://github.com/Saitama4722)
+- **Telegram:** [@VadikQA](https://t.me/VadikQA)
+- **Repository:** [github.com/Saitama4722/abacus-game-web-service](https://github.com/Saitama4722/abacus-game-web-service)

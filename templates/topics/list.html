@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Банк заданий — Абакус{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item active">Банк тем</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Банк заданий и тем</h1>
+    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createTopicModal">
+        <i class="bi bi-plus-lg me-1"></i>Создать тему
+    </button>
+</div>
+<p class="text-muted mb-4">Здесь хранятся все темы и к ним можно прикреплять любое количество задач. Затем вы сможете использовать эти темы в конкретных играх.</p>
+
+<div class="list-group shadow-sm">
+    {% for topic in topics %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="/topics/{{ topic.id }}/edit" class="text-decoration-none text-dark flex-grow-1">
+            <strong>{{ topic.title }}</strong>
+            <div class="text-muted small">Заданий в базе: {{ topic.tasks|length }}</div>
+        </a>
+        <form method="post" action="/topics/{{ topic.id }}/delete" class="d-inline" onsubmit="return confirm('Удалить тему и все её задания из банка? Действие необратимо.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Удалить тему"><i class="bi bi-trash"></i></button>
+        </form>
+    </div>
+    {% else %}
+    <div class="list-group-item text-center py-4 text-muted">
+        Банк тем пуст. Создайте первую тему.
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal for Creating Topic -->
+<div class="modal fade" id="createTopicModal" tabindex="-1" aria-labelledby="createTopicModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="/topics/create">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTopicModalLabel">Новая тема</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название темы</label>
+                        <input type="text" class="form-control" id="title" name="title" required maxlength="256">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
